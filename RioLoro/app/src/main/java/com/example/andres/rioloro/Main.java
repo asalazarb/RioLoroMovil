@@ -1,9 +1,11 @@
 package com.example.andres.rioloro;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Layout;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -18,13 +20,16 @@ public class Main extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    mTextMessage.setText(R.string.text_intro);
+                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
                     return true;
                 case R.id.navigation_dashboard:
                     mTextMessage.setText(R.string.title_dashboard);
+                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
                     return true;
                 case R.id.navigation_notifications:
                     mTextMessage.setText(R.string.title_notifications);
+                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
                     return true;
             }
             return false;
