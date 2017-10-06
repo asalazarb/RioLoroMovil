@@ -21,15 +21,14 @@ public class Main extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.text_intro);
-                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
                     return true;
                 case R.id.navigation_dashboard:
                     mTextMessage.setText(R.string.title_dashboard);
-                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
+                    //startActivity(new Intent(Main.this.getApplicationContext(),NombreDeLaClaseDelLayout.class));
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
-                    // Intent Activity = new Intent(this,LAYOUT DONDE QUIEREN IR);
+                    // mTextMessage.setText(R.string.title_notifications);
+                    startActivity(new Intent(Main.this.getApplicationContext(),IndexEspecies.class));
                     return true;
             }
             return false;
