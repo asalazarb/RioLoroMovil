@@ -5,5 +5,12 @@
     <string name="title_notifications">Índice</string>
 
     <string name="text_intro">Bienvenido a la aplicación móvil.</string>
+    <string name="transition_drawable">drawable</string>
+    <string name="transition_message">message</string>
+    <string name="transition_time_and_date">date</string>
     <string name="title_activity_index_especies">IndexEspecies</string>
+
+    <string name="action_delete_item">Item Deleted</string>
+    <string name="action_undo">UNDO?</string>
+    <string name="title_toolbar">List Activity</string>
 </resources>
