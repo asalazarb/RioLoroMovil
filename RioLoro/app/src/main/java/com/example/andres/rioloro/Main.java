@@ -9,6 +9,8 @@ import android.text.Layout;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.andres.rioloro.view.ListActivity;
+
 public class Main extends AppCompatActivity {
 
     private TextView mTextMessage;
@@ -28,7 +30,7 @@ public class Main extends AppCompatActivity {
                     return true;
                 case R.id.navigation_notifications:
                     // mTextMessage.setText(R.string.title_notifications);
-                    startActivity(new Intent(Main.this.getApplicationContext(),IndexEspecies.class));
+                    startActivity(new Intent(Main.this.getApplicationContext(),ListActivity.class));
                     return true;
             }
             return false;

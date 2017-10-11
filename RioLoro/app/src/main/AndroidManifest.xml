@@ -18,7 +18,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".IndexEspecies"></activity>
+        <activity android:name=".view.ListActivity"></activity>
+        <activity android:name=".view.DetailActivity"></activity>
     </application>
 
 </manifest>
