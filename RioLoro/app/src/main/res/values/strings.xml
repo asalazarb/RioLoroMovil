@@ -2,7 +2,7 @@
     <string name="app_name">RioLoro</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">QR</string>
-    <string name="title_notifications">Índice</string>
+    <string name="title_notifications">Album</string>
 
     <string name="text_intro">Bienvenido a la aplicación móvil.</string>
     <string name="transition_drawable">drawable</string>
