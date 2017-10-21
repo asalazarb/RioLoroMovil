@@ -15,21 +15,35 @@ public class FakeDataSource implements DataSourceInterface{
     private Random random;
 
     private final String[] datesAndTimes = {
-            "6:30AM 06/01/2017",
-            "9:26PM 04/22/2013",
-            "2:01PM 12/02/2015",
-            "2:43AM 09/7/2018",
+            "6:30AM 10/13/2017",
+            "9:26PM 10/10/2017",
+            "2:43AM 10/10/2017",
+            "2:13PM 9/10/2017",
+            "2:11PM 9/10/2017",
+            "2:01PM 9/10/2017",
     };
 
     private final String[] messages = {
-            "Check out content like Fragmented Podcast to expose yourself to the knowledge, ideas, " +
-                    "and opinions of experts in your field",
+            /*"Check out content like Fragmented Podcast to expose yourself to the knowledge, ideas, " +
+                    "and opinions of experts in your field",*/
+            /*"Yigüirro\nTurdus grayi\nReino: Animalia\nFilo: Chordata\nClase: Aves\nOrden: Passeriformes\nFamilia: Turdidae\nGénero: Turdus",
             "Look at Open Source Projects like Android Architecture Blueprints to see how experts" +
                     " design and build Apps",
             "Write lots of Code and Example Apps. Writing good Quality Code in an efficient manner "
                     + "is a Skill to be practiced like any other.",
             "If at first something doesn't make any sense, find another explanation. We all " +
-                    "learn/teach different from each other. Find an explanation that speaks to you."
+                    "learn/teach different from each other. Find an explanation that speaks to you."*/
+            "Mariposa Morpho\nNombre Cientfíco: Morpho didius\nReino: Animalia\nFilo: Arthropoda\nClase: Insecta\nOrden: Lepidoptera\nFamilia:  	Nymphalidae\nGénero: Morpho",
+
+            "Lombriz de tierra\nNombre Cientfíco: Lumbricidae\nReino: Animalia\nFilo: Annelida\nClase: Clitellata\nOrden: Haplotaxida\nFamilia: Lumbricidae\nGénero: Lumbricus",
+
+            "Zopilote\nNombre Cientfíco: Cathartes aura\nReino: Animalia\nFilo: Chrdata\nClase: Aves\nOrden: Falconiformes\nFamilia: Cathartidae\nGénero: Cathartes",
+
+            "Amatillo\nNombre Cientfíco: Ficus pertusa\nReino: Plantae\nFilo: Magnoliophyta\nClase: Magnoliopsida\nOrden: Urticales\nFamilia: Moraceae\nGénero: Ficus",
+
+            "Heliconia Tortuosa\nNombre Cientfíco: Heliconia tortuosa\nReino: Plantae\nFilo: Monocots\nClase: Commelinids\nOrden: Zingiberales\nFamilia: Heliconiaceae\nGénero: Heliconia",
+
+            "Lantana\nNombre Cientfíco: Lantana camara\nReino: Plantae\nFilo: Magnoliophyta\nClase: Magnoliopsida\nOrden: Lamiales\nFamilia: Verbenaceae\nGénero: Lantana"
     };
 
     private final int[] drawables = {
@@ -50,19 +64,48 @@ public class FakeDataSource implements DataSourceInterface{
      * @return A list of 12 semi-random ListItems for testing purposes
      */
 
+
+    /*-----------------------------------------------------------------
+    * SE CREA EL ITEM DE LA ESPECIE
+    * ---------------------------------------------------------------*/
+    public ListItem addSpecie(String scientificName){
+        //Conexion a la base
+        //Llamar al sp con el scientificName
+        //Crear el listItem
+        ListItem listItem = new ListItem(
+                datesAndTimes[0],
+                messages[0],
+                drawables[0]
+        );
+
+        return listItem;
+
+    }
+
     @Override
     public List<ListItem> getListOfData() {
         ArrayList<ListItem> listOfData = new ArrayList<>();
         Random random = new Random();
         //make 12 semi-random items
-        for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 6; i++) {
 
             listOfData.add(
-                    createNewListItem()
+                    //createNewListItem()
+                    crearItem(i)
             );
         }
 
         return listOfData;
+    }
+
+    public ListItem crearItem(int x){
+        ListItem listItem = new ListItem(
+                datesAndTimes[x],
+                messages[x],
+                drawables[x%4]
+        );
+
+        return listItem;
     }
 
     @Override
