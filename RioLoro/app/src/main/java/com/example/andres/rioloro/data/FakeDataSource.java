@@ -7,6 +7,8 @@ package com.example.andres.rioloro.data;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Date;
+import java.text.*;
 
 import com.example.andres.rioloro.R;
 
@@ -47,7 +49,7 @@ public class FakeDataSource implements DataSourceInterface{
     };
 
     private final int[] drawables = {
-            R.drawable.green_drawable,
+            R.drawable.morpho,
             R.drawable.red_drawable,
             R.drawable.blue_drawable,
             R.drawable.yellow_drawable
@@ -64,22 +66,30 @@ public class FakeDataSource implements DataSourceInterface{
      * @return A list of 12 semi-random ListItems for testing purposes
      */
 
+    /**
+     * Función que da la hora
+     */
+
+    public String getHour(){
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a dd/MM/yyyy");
+        return simpleDateFormat.format(date);
+    };
 
     /*-----------------------------------------------------------------
     * SE CREA EL ITEM DE LA ESPECIE
     * ---------------------------------------------------------------*/
-    public ListItem addSpecie(String scientificName){
+    public ListItem crearItem(int x){
         //Conexion a la base
         //Llamar al sp con el scientificName
         //Crear el listItem
         ListItem listItem = new ListItem(
-                datesAndTimes[0],
-                messages[0],
-                drawables[0]
+                getHour(),
+                messages[x],
+                drawables[x%4]
         );
 
         return listItem;
-
     }
 
     @Override
@@ -96,16 +106,6 @@ public class FakeDataSource implements DataSourceInterface{
         }
 
         return listOfData;
-    }
-
-    public ListItem crearItem(int x){
-        ListItem listItem = new ListItem(
-                datesAndTimes[x],
-                messages[x],
-                drawables[x%4]
-        );
-
-        return listItem;
     }
 
     @Override
