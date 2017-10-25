@@ -4,11 +4,13 @@
     <string name="title_dashboard">QR</string>
     <string name="title_notifications">Album</string>
 
-    <string name="text_intro">Bienvenido a la aplicación móvil.</string>
+    <string name="text_intro">Bienvenidos al álbum de especies.</string>
     <string name="transition_drawable">drawable</string>
     <string name="transition_message">message</string>
     <string name="transition_time_and_date">date</string>
-    <string name="title_activity_index_especies">IndexEspecies</string>
+    <string name="informacionImportante">En esta aplicación puedes descubrir un poco más de información acerca de las especies con las que contamos.</string>
+    <string name="informacionImportante2">Para esto debes leer los códigos QR que encontrarás en algunas partes del parque.</string>
+    <!--<string name="title_activity_index_especies">IndexEspecies</string>-->
 
     <string name="action_delete_item">Item Deleted</string>
     <string name="action_undo">UNDO?</string>

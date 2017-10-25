@@ -12,7 +12,7 @@ class Database
         $this->_Host = $pHost;
         $this->_User = $pUser;
         $this->_Password = $pPassword; 
-		$this->_DataBaseName = $pDataBaseName;      
+		$this->_DataBaseName = $pDataBaseName;   
         $this->connect();
 		mysqli_set_charset($this->_Connection, "UTF8");
     }
