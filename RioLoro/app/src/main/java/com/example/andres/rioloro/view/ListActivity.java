@@ -15,7 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.design.widget.FloatingActionButton;
+import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.Fade;
 import android.util.Pair;
@@ -34,7 +34,7 @@ import com.example.andres.rioloro.data.ListItem;
 import com.example.andres.rioloro.logic.Controller;
 import com.example.andres.rioloro.R;
 
-public class ListActivity extends AppCompatActivity implements ViewInterface, View.OnClickListener {
+public class ListActivity extends AppCompatActivity implements ViewInterface{
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
     private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
     private static final String EXTRA_DRAWABLE = "EXTRA_DRAWABLE";
@@ -59,9 +59,6 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
 
         recyclerView = (RecyclerView) findViewById(R.id.rec_list_activity);
         layoutInflater = getLayoutInflater();
-
-        FloatingActionButton fabulous = (FloatingActionButton) findViewById(R.id.fab_create_new_item);
-        fabulous.setOnClickListener(this);
 
         controller = new Controller(this, new FakeDataSource());
     }
@@ -191,15 +188,6 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         listOfData.add(position, listItem);
 
         adapter.notifyItemInserted(position);
-    }
-
-    @Override
-    public void onClick(View v) {
-        int viewId = v.getId();
-        if (viewId == R.id.fab_create_new_item) {
-            //User wishes to creat a new RecyclerView Item
-            controller.createNewListItem();
-        }
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {//6
