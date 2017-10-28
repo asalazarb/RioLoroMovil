@@ -93,4 +93,9 @@ public class Controller {
         temporaryListItem = null;
         temporaryListItemPosition = 0;
     }
+
+    public ListItem crearEspecie(int x){
+        ListItem item = dataSource.recargarItem(x);
+        return item;
+    }
 }

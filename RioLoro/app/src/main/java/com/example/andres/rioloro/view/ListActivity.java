@@ -6,6 +6,7 @@ package com.example.andres.rioloro.view;
 
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.BaseTransientBottomBar;
@@ -15,29 +16,34 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.Fade;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-
-
+import java.util.ArrayList;
 import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import com.example.andres.rioloro.data.FakeDataSource;
 import com.example.andres.rioloro.data.ListItem;
 import com.example.andres.rioloro.logic.Controller;
 import com.example.andres.rioloro.R;
+import com.example.andres.rioloro.persistence.DatabaseHelper;
 
-public class ListActivity extends AppCompatActivity implements ViewInterface{
+public class ListActivity extends AppCompatActivity implements ViewInterface, View.OnClickListener{
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
     private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
     private static final String EXTRA_DRAWABLE = "EXTRA_DRAWABLE";
+
+    private static final String TAG = "ListActivity";
 
     /**
      * 2.
@@ -51,6 +57,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface{
     private CustomAdapter adapter;
 
     private Controller controller;
+    DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,8 +67,34 @@ public class ListActivity extends AppCompatActivity implements ViewInterface{
         recyclerView = (RecyclerView) findViewById(R.id.rec_list_activity);
         layoutInflater = getLayoutInflater();
 
+        FloatingActionButton fabulous = (FloatingActionButton) findViewById(R.id.fab_create_new_item);
+        fabulous.setOnClickListener(this);
+
         controller = new Controller(this, new FakeDataSource());
+
+        databaseHelper = new DatabaseHelper(this);
+        populateRecylerView();
     }
+
+    //Funciones para la persistencia de datos
+    public void addData(String especie){
+        boolean insertData = databaseHelper.addData(especie);
+    }
+
+    public void populateRecylerView(){
+        Log.d(TAG,"populateRecylerView: Displaying data in the recyclerview");
+
+        Cursor data = databaseHelper.getData();
+        ArrayList<ListItem> arrayList = new ArrayList<>();
+
+        while (data.moveToNext()){
+            Integer valorDelItem = Integer.parseInt(data.getString(0));
+            ListItem item = controller.crearEspecie(valorDelItem);
+            arrayList.add(item);
+        }
+        setUpAdapterAndView(arrayList);
+    }
+    /*==============================================*/
 
     /**
      * 17.
@@ -150,6 +183,8 @@ public class ListActivity extends AppCompatActivity implements ViewInterface{
         adapter.notifyItemInserted(endOfList);
 
         recyclerView.smoothScrollToPosition(endOfList);
+
+        addData(newItem.toString());
     }
 
     @Override
@@ -188,6 +223,16 @@ public class ListActivity extends AppCompatActivity implements ViewInterface{
         listOfData.add(position, listItem);
 
         adapter.notifyItemInserted(position);
+    }
+
+    //Funcion usada para generar un nuevo item al album
+    @Override
+    public void onClick(View v) {
+        int viewId = v.getId();
+        if (viewId == R.id.fab_create_new_item) {
+            //User wishes to creat a new RecyclerView Item
+            controller.createNewListItem();
+        }
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {//6

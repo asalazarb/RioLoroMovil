@@ -13,6 +13,8 @@ public interface DataSourceInterface {
 
     ListItem createNewListItem();
 
+    ListItem recargarItem(int x);
+
     void deleteListItem(ListItem listItem);
 
     void insertListItem(ListItem temporaryListItem);
