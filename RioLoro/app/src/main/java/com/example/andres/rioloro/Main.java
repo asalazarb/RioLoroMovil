@@ -23,12 +23,9 @@ public class Main extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.text_intro);
-                    mTextMessage.setText(R.string.informacionImportante);
-                    mTextMessage.setText(R.string.informacionImportante2);
                     return true;
                 case R.id.navigation_dashboard:
                     mTextMessage.setText(R.string.title_dashboard);
-                    //startActivity(new Intent(Main.this.getApplicationContext(),NombreDeLaClaseDelLayout.class));
                     return true;
                 case R.id.navigation_notifications:
                     // mTextMessage.setText(R.string.title_notifications);

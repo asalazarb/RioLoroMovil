@@ -47,6 +47,7 @@ public class Controller {
     }
 
 
+    //Una vez que el código es leído deberá ser enviado a esta función
     public void createNewListItem() {
         /*
         To simulate telling the DataSource to create a new record and waiting for it's response,
@@ -92,5 +93,10 @@ public class Controller {
     public void onSnackbarTimeout() {
         temporaryListItem = null;
         temporaryListItemPosition = 0;
+    }
+
+    public ListItem crearEspecie(int x){
+        ListItem item = dataSource.recargarItem(x);
+        return item;
     }
 }
