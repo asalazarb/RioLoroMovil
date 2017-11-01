@@ -21,7 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/lbl_message_body"
-        android:background="@color/colorTransparentBlack"
+        android:background="@color/colorTransparentWhite"
         android:padding="16dp"
         android:transitionName="@string/transition_time_and_date"
         tools:text="2:43AM 09/7/2018" />

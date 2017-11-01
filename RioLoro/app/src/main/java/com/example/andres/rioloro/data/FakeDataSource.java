@@ -68,7 +68,7 @@ public class FakeDataSource implements DataSourceInterface{
     /*Función que da la hora*/
     public String getHour(){
         Date date = new Date();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm a dd/MM/yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
         return simpleDateFormat.format(date);
     };
 
@@ -91,7 +91,6 @@ public class FakeDataSource implements DataSourceInterface{
 
     /*Cada vez que el dispositivo cambia de orientación esta función recrea el contenido*/
     /*==================================================================================*/
-    //Cuando se desea extraer los datos de la base SQLite se debe hacer en esta función
     @Override
     public List<ListItem> getListOfData() {
         ArrayList<ListItem> listOfData = new ArrayList<>();
@@ -109,7 +108,15 @@ public class FakeDataSource implements DataSourceInterface{
         return listItem;
     }
 
+    //Añadir la extracción de la base de datos
     public ListItem crearItem(int x){
+
+        /*
+        1. Conectar la app a la base
+        2. Generar JSON con los datos
+        3. Convertir la informacion del JSON en un string
+        4. Obtener la imagen
+        */
         ListItem listItem = new ListItem(
                 getHour(),
                 messages[x],

@@ -5,6 +5,7 @@ package com.example.andres.rioloro.view;
  */
 
 import android.app.ActivityOptions;
+import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Build;
@@ -25,6 +26,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +39,9 @@ import com.example.andres.rioloro.data.ListItem;
 import com.example.andres.rioloro.logic.Controller;
 import com.example.andres.rioloro.R;
 import com.example.andres.rioloro.persistence.DatabaseHelper;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class ListActivity extends AppCompatActivity implements ViewInterface, View.OnClickListener{
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
@@ -59,6 +64,9 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     private Controller controller;
     DatabaseHelper databaseHelper;
 
+    //Para la funcionalidad del botón QR
+    private FloatingActionButton button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,8 +75,25 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         recyclerView = (RecyclerView) findViewById(R.id.rec_list_activity);
         layoutInflater = getLayoutInflater();
 
-        FloatingActionButton fabulous = (FloatingActionButton) findViewById(R.id.fab_create_new_item);
-        fabulous.setOnClickListener(this);
+        //FloatingActionButton fabulous = (FloatingActionButton) findViewById(R.id.fab_create_new_item);
+        //fabulous.setOnClickListener(this);
+
+        //Se declara la variable que contiene el id del botón
+        button = (FloatingActionButton)this.findViewById(R.id.read_QR);
+        final Activity activity = this;
+
+        button.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                IntentIntegrator integrator = new IntentIntegrator(activity);
+                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
+                integrator.setPrompt("scan");
+                integrator.setCameraId(0);
+                integrator.setBeepEnabled(false);
+                integrator.setBarcodeImageEnabled(false);
+                integrator.initiateScan();
+            }
+        });
 
         controller = new Controller(this, new FakeDataSource());
 
@@ -76,11 +101,34 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         populateRecylerView();
     }
 
+    //Parte en la que se activa cuando se trata de leer el códigoQR
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        if (result != null) {
+            if (result.getContents() == null) {
+                Log.d("MainActivity", "Cancelled scan");
+                Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
+            } else {
+                Log.d("MainActivity", "scanned");
+                Toast.makeText(this, "scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+            }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
+    }
+    //==============================================================================================
+
     //Funciones para la persistencia de datos
+
+    //Función encargada de ingresar la especie a la base de datos
     public void addData(String especie){
-        boolean insertData = databaseHelper.addData(especie);
+        //boolean insertData =
+        databaseHelper.addData(especie);
     }
 
+    /*Cada vez que el dispositivo cambia de orientacion esta funcion se encarga de
+     repoblar dichos datos*/
     public void populateRecylerView(){
         Log.d(TAG,"populateRecylerView: Displaying data in the recyclerview");
 
@@ -94,7 +142,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         }
         setUpAdapterAndView(arrayList);
     }
-    /*==============================================*/
+    /*============================================================================================*/
 
     /**
      * 17.
