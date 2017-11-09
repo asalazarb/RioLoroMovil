@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -18,23 +19,31 @@ import java.util.Date;
 import java.text.*;
 import com.example.andres.rioloro.R;
 import com.example.andres.rioloro.persistence.DatabaseHelper;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class FakeDataSource implements DataSourceInterface{
-    private static final int sizeOfCollection = 12;
 
     private Random random;
 
-    private final String[] datesAndTimes = {
-            "6:30AM 10/13/2017",
-            "9:26PM 10/10/2017",
-            "2:43AM 10/10/2017",
-            "2:13PM 9/10/2017",
-            "2:11PM 9/10/2017",
-            "2:01PM 9/10/2017",
+    //URL para el servidor
+    final String serverUrl = "http://172.20.10.3:5050";
+
+    private final String[] especies = {
+            "geris",
+            "Morpho didius",
+            "Lumbricidae",
+            "Cathartes aura",
+            "Ficus pertusa",
+            "Heliconia tortuosa",
+            "Lantana camara",
     };
 
     private final String[] messages = {
-            "Mariposa Morpho\nNombre Cientfíco: Morpho didius\nReino: Animalia\nFilo: Arthropoda\nClase: Insecta\nOrden: Lepidoptera\nFamilia:  	Nymphalidae\nGénero: Morpho",
+            "ultimo gerald",
+
+            "Mariposa Morpho\nNombre Cientfíco: Morpho didius\nReino: Animalia\nFilo: Arthropoda\nClase: Insecta\nOrden: Lepidoptera\nFamilia: Nymphalidae\nGénero: Morpho",
 
             "Lombriz de tierra\nNombre Cientfíco: Lumbricidae\nReino: Animalia\nFilo: Annelida\nClase: Clitellata\nOrden: Haplotaxida\nFamilia: Lumbricidae\nGénero: Lumbricus",
 
@@ -51,7 +60,8 @@ public class FakeDataSource implements DataSourceInterface{
             R.drawable.green_drawable,
             R.drawable.red_drawable,
             R.drawable.blue_drawable,
-            R.drawable.yellow_drawable
+            R.drawable.yellow_drawable,
+            R.drawable.blue_drawable,
     };
 
 
@@ -70,23 +80,6 @@ public class FakeDataSource implements DataSourceInterface{
         Date date = new Date();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
         return simpleDateFormat.format(date);
-    };
-
-    /*-----------------------------------------------------------------
-    * SE CREA EL ITEM DE LA ESPECIE
-    * ---------------------------------------------------------------*/
-    public ListItem addSpecie(String scientificName){
-        //Conexion a la base
-        //Llamar al sp con el scientificName
-        //Crear el listItem
-        ListItem listItem = new ListItem(
-                getHour(),
-                messages[0],
-                drawables[0]
-        );
-
-        return listItem;
-
     }
 
     /*Cada vez que el dispositivo cambia de orientación esta función recrea el contenido*/
@@ -99,36 +92,18 @@ public class FakeDataSource implements DataSourceInterface{
     }
     /*==================================================================================*/
 
-    public ListItem recargarItem(int x){
+    @Override
+    public ListItem recargarItem(String especie,String fechaHora){
         ListItem listItem = new ListItem(
-                getHour(),
-                messages[x%4],
-                drawables[x%4]
+                fechaHora,
+                especie,
+                R.drawable.red_drawable
         );
         return listItem;
     }
 
-    //Añadir la extracción de la base de datos
-    public ListItem crearItem(int x){
 
-        /*
-        1. Conectar la app a la base
-        2. Generar JSON con los datos
-        3. Convertir la informacion del JSON en un string
-        4. Obtener la imagen
-        */
-        ListItem listItem = new ListItem(
-                getHour(),
-                messages[x],
-                drawables[x%4]
-        );
-        String nombreCientifico = String.valueOf(x);
-
-        return listItem;
-    }
-
-
-
+    //BORRAR
     @Override
     public ListItem createNewListItem() {
 
@@ -144,6 +119,21 @@ public class FakeDataSource implements DataSourceInterface{
                 drawables[randThree]
         );
         return listItem;
+    }
+
+    /*-----------------------------------------------------------------
+    * SE CREA EL ITEM DE LA ESPECIE
+    * ---------------------------------------------------------------*/
+    @Override
+    public ListItem agregarEspecie(String scientificName, String imagen){
+
+        ListItem listItem = new ListItem(
+                getHour(),
+                scientificName,
+                R.drawable.green_drawable
+        );
+        return listItem;
+
     }
 
     @Override

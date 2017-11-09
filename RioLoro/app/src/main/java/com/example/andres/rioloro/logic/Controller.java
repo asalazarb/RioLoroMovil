@@ -47,20 +47,16 @@ public class Controller {
     }
 
 
-    //Una vez que el código es leído deberá ser enviado a esta función
     public void createNewListItem() {
-        /*
-        To simulate telling the DataSource to create a new record and waiting for it's response,
-        we'll simply have it return a new ListItem.
-
-        In a real App, I'd use RxJava 2 (or some other
-        API/Framework for Asynchronous Communication) to have the Datasource do this on the
-         IO thread, and respond via an Asynchronous callback to the Main thread.
-         */
 
         ListItem newItem = dataSource.createNewListItem();
 
         view.addNewListItemToView(newItem);
+    }
+
+    public void agregarEspecie(String nombreCientifico, String image){
+        ListItem nuevaEspecie = dataSource.agregarEspecie(nombreCientifico,image);
+        view.addNewListItemToView(nuevaEspecie);
     }
 
     public void onListItemSwiped(int position, ListItem listItem) {
@@ -95,8 +91,8 @@ public class Controller {
         temporaryListItemPosition = 0;
     }
 
-    public ListItem crearEspecie(int x){
-        ListItem item = dataSource.recargarItem(x);
+    public ListItem crearEspecie(String especie,String fechaHora){
+        ListItem item = dataSource.recargarItem(especie,fechaHora);
         return item;
     }
 }

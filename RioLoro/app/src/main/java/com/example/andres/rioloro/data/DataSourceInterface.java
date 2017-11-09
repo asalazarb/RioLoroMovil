@@ -5,6 +5,8 @@ package com.example.andres.rioloro.data;
  */
 
 
+import com.example.andres.rioloro.view.ListActivity;
+
 import java.util.List;
 
 public interface DataSourceInterface {
@@ -15,9 +17,9 @@ public interface DataSourceInterface {
 
     ListItem createNewListItem();
 
-    ListItem recargarItem(int x);
+    ListItem recargarItem(String especie,String fechaHora);
 
-    ListItem crearItem(int x);
+    ListItem agregarEspecie(String x, String y);
 
     void deleteListItem(ListItem listItem);
 

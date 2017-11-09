@@ -34,6 +34,9 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     //Usados para el QR
-    compile 'com.google.zxing:core:3.2.1'
-    compile 'com.journeyapps:zxing-android-embedded:3.2.0@aar'
+    compile 'com.journeyapps:zxing-android-embedded:3.4.0'
+
+    //extraer imagen del server
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
 }
