@@ -10,7 +10,8 @@ public class ListItem {
     private int colorResource;
 
     /*It's common for an "Item" to have a unique Id for storing an a Database
-    private String uniqueIdentifier;*/
+    private String uniqueIdentifier;
+    */
 
     public ListItem(String dateAndTime, String message, int colorResource) {
         this.dateAndTime = dateAndTime;
@@ -42,4 +43,5 @@ public class ListItem {
     public void setMessage(String message) {
         this.message = message;
     }
+
 }

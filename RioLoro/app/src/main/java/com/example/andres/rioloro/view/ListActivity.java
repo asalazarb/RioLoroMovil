@@ -6,8 +6,10 @@ package com.example.andres.rioloro.view;
 
 import android.app.ActivityOptions;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.BaseTransientBottomBar;
@@ -18,7 +20,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.transition.Fade;
 import android.util.Log;
@@ -26,24 +27,42 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
+
+import com.example.andres.rioloro.Main;
 import com.example.andres.rioloro.data.FakeDataSource;
 import com.example.andres.rioloro.data.ListItem;
 import com.example.andres.rioloro.logic.Controller;
 import com.example.andres.rioloro.R;
 import com.example.andres.rioloro.persistence.DatabaseHelper;
-import com.google.zxing.integration.android.IntentIntegrator;
+
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.squareup.picasso.Picasso;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class ListActivity extends AppCompatActivity implements ViewInterface, View.OnClickListener{
+
+    //URL para el servidor
+    final String serverUrl = "http://172.20.10.3:5050";
+
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
     private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
     private static final String EXTRA_DRAWABLE = "EXTRA_DRAWABLE";
@@ -65,6 +84,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     DatabaseHelper databaseHelper;
 
     //Para la funcionalidad del botón QR
+    private IntentIntegrator qrScan;
     private FloatingActionButton button;
 
     @Override
@@ -75,31 +95,21 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         recyclerView = (RecyclerView) findViewById(R.id.rec_list_activity);
         layoutInflater = getLayoutInflater();
 
-        //FloatingActionButton fabulous = (FloatingActionButton) findViewById(R.id.fab_create_new_item);
-        //fabulous.setOnClickListener(this);
 
         //Se declara la variable que contiene el id del botón
         button = (FloatingActionButton)this.findViewById(R.id.read_QR);
-        final Activity activity = this;
 
-        button.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                IntentIntegrator integrator = new IntentIntegrator(activity);
-                integrator.setDesiredBarcodeFormats(IntentIntegrator.ALL_CODE_TYPES);
-                integrator.setPrompt("scan");
-                integrator.setCameraId(0);
-                integrator.setBeepEnabled(false);
-                integrator.setBarcodeImageEnabled(false);
-                integrator.initiateScan();
-            }
-        });
+        //intializing scan object
+        qrScan = new IntentIntegrator(this);
+
+        button.setOnClickListener(this);
 
         controller = new Controller(this, new FakeDataSource());
 
         databaseHelper = new DatabaseHelper(this);
         populateRecylerView();
     }
+
 
     //Parte en la que se activa cuando se trata de leer el códigoQR
     @Override
@@ -111,9 +121,14 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
                 Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "scanned");
-                Toast.makeText(this, "scanned: " + result.getContents(), Toast.LENGTH_LONG).show();
+
+                //Se ejecuta el agregado de datos con el url leido
+                new ListActivity.JSONTask().execute(result.getContents());
+                //controller.createNewListItem();
+                //controller.agregarEspecie("Morpho didius");
             }
         } else {
+            Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -122,9 +137,8 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     //Funciones para la persistencia de datos
 
     //Función encargada de ingresar la especie a la base de datos
-    public void addData(String especie){
-        //boolean insertData =
-        databaseHelper.addData(especie);
+    public void addData(String especie,String fechaHora){
+        databaseHelper.addData(especie,fechaHora);
     }
 
     /*Cada vez que el dispositivo cambia de orientacion esta funcion se encarga de
@@ -136,8 +150,10 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         ArrayList<ListItem> arrayList = new ArrayList<>();
 
         while (data.moveToNext()){
-            Integer valorDelItem = Integer.parseInt(data.getString(0));
-            ListItem item = controller.crearEspecie(valorDelItem);
+            //Integer valorDelItem = Integer.parseInt(data.getString(1));
+            String valorDelItem = data.getString(1);
+            String valorDeLaFechaHora = data.getString(2);
+            ListItem item = controller.crearEspecie(valorDelItem,valorDeLaFechaHora);
             arrayList.add(item);
         }
         setUpAdapterAndView(arrayList);
@@ -231,8 +247,6 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         adapter.notifyItemInserted(endOfList);
 
         recyclerView.smoothScrollToPosition(endOfList);
-
-        addData(newItem.toString());
     }
 
     @Override
@@ -276,38 +290,24 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     //Funcion usada para generar un nuevo item al album
     @Override
     public void onClick(View v) {
-        int viewId = v.getId();
+        qrScan.initiateScan();
+        /*int viewId = v.getId();
         if (viewId == R.id.fab_create_new_item) {
             //User wishes to creat a new RecyclerView Item
             controller.createNewListItem();
-        }
+        }*/
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {//6
+        private Context context;
 
-        /**
-         * 13.
-         * Inflates a new View (in this case, R.layout.item_data), and then creates/returns a new
-         * CustomViewHolder object.
-         *
-         * @param parent   Unfortunately the docs currently don't explain this at all :(
-         * @param viewType Unfortunately the docs currently don't explain this at all :(
-         * @return
-         */
         @Override
         public CustomAdapter.CustomViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = layoutInflater.inflate(R.layout.item_data, parent, false);
             return new CustomViewHolder(v);
         }
 
-        /**
-         * This method "Binds" or assigns Data (from listOfData) to each View (ViewHolder).
-         *
-         * @param holder   The current ViewHolder instance for a given position
-         * @param position The current position of the ViewHolder we are Binding to, based upon
-         *                 our (listOfData). So for the second ViewHolder we create, we'll bind data
-         *                 from the second Item in listOfData.
-         */
+
         @Override
         public void onBindViewHolder(CustomAdapter.CustomViewHolder holder, int position) {
             //11. and now the ViewHolder data
@@ -328,22 +328,11 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
             holder.loading.setVisibility(View.INVISIBLE);
         }
 
-        /**
-         * This method let's our Adapter determine how many ViewHolders it needs to create, based on
-         * the size of the Dataset (List) which it is working with.
-         *
-         * @return the size of the dataset, generally via List.size()
-         */
         @Override
         public int getItemCount() {
-            // 12. Returning 0 here will tell our Adapter not to make any Items. Let's fix that.
             return listOfData.size();
         }
 
-        /**
-         * 5.
-         * Each ViewHolder contains Bindings to the Views we wish to populate with Data.
-         */
         class CustomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
             //10. now that we've made our layouts, let's bind them
@@ -361,30 +350,13 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
                 this.loading = (ProgressBar) itemView.findViewById(R.id.pro_item_data);
 
                 this.container = (ViewGroup) itemView.findViewById(R.id.root_list_item);
-                /*
-                We can pass "this" as an Argument, because "this", which refers to the Current
-                Instance of type CustomViewHolder currently conforms to (implements) the
-                View.OnClickListener interface. I have a Video on my channel which goes into
-                Interfaces with Detailed Examples.
 
-                Search "Android WTF: Java Interfaces by Example"
-                 */
                 this.container.setOnClickListener(this);
             }
 
-            /**
-             * 6.
-             * Since I'm ok with the whole Container being the Listener, View v isn't super useful
-             * in this Use Case. However, if I had a Single RecyclerView Item with multiple
-             * Clickable Views, I could use v.getId() to tell which specific View was clicked.
-             * See the comment within the method.
-             *
-             * @param v
-             */
+
             @Override
             public void onClick(View v) {
-                //getAdapterPosition() get's an Integer based on which the position of the current
-                //ViewHolder (this) in the Adapter. This is how we get the correct Data.
                 ListItem listItem = listOfData.get(
                         this.getAdapterPosition()
                 );
@@ -399,10 +371,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     }
 
     private ItemTouchHelper.Callback createHelperCallback() {
-        /*First Param is for Up/Down motion, second is for Left/Right.
-        Note that we can supply 0, one constant (e.g. ItemTouchHelper.LEFT), or two constants (e.g.
-        ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) to specify what directions are allowed.
-        */
+
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(
                 0,
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -426,5 +395,77 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         };
 
         return simpleItemTouchCallback;
+    }
+
+    //Convierte el string del link y lo convierte en un JSON
+    public class JSONTask extends AsyncTask<String, String, String> {
+        //Conexion al server
+        HttpURLConnection connection = null;
+        BufferedReader reader = null;
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection) url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+
+                reader = new BufferedReader(new BufferedReader(new InputStreamReader(stream)));
+
+                StringBuffer buffer = new StringBuffer();
+
+                String line = "";
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line);
+                }
+                Toast.makeText(ListActivity.this, buffer.toString(), Toast.LENGTH_LONG).show();
+                return buffer.toString();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+                try {
+                    if (reader != null) {
+                        reader.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            try {
+                JSONObject obj = new JSONObject(result);
+                String newItem = obj.getString("nombreComun")+"\nNombre científico: "+
+                                 obj.getString("nombreCientifico");
+                //JSONObject image = new JSONObject(obj.getString("image"));
+                controller.agregarEspecie(newItem,serverUrl);
+
+                //Ingresa la especie a la base SQLite
+                String fechaHora = getHour();
+                addData(newItem,fechaHora);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*Función que da la hora*/
+    public String getHour(){
+        Date date = new Date();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy hh:mm a");
+        return simpleDateFormat.format(date);
     }
 }
