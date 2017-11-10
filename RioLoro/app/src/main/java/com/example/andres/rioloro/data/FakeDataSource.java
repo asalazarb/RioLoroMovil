@@ -31,13 +31,12 @@ public class FakeDataSource implements DataSourceInterface{
     final String serverUrl = "http://172.20.10.3:5050";
 
     private final String[] especies = {
-            "geris",
             "Morpho didius",
+            "geris",
             "Lumbricidae",
             "Cathartes aura",
             "Ficus pertusa",
-            "Heliconia tortuosa",
-            "Lantana camara",
+            "Heliconia tortuosa"
     };
 
     private final String[] messages = {
@@ -57,6 +56,7 @@ public class FakeDataSource implements DataSourceInterface{
     };
 
     private final int[] drawables = {
+            R.drawable.morpho,
             R.drawable.green_drawable,
             R.drawable.red_drawable,
             R.drawable.blue_drawable,
@@ -67,6 +67,17 @@ public class FakeDataSource implements DataSourceInterface{
 
     public FakeDataSource() {
         random = new Random();
+    }
+
+    public Integer posicionImagen(String nombre){
+        int posicion = 0;
+
+        for (int i=0; i<especies.length; i++){
+            if (especies[i].equals(nombre)){
+                posicion=i;
+            }
+        }
+        return posicion;
     }
 
     /**
@@ -93,30 +104,15 @@ public class FakeDataSource implements DataSourceInterface{
     /*==================================================================================*/
 
     @Override
-    public ListItem recargarItem(String especie,String fechaHora){
+    public ListItem recargarItem(String especie,String linea ,String fechaHora, String image){
+
+        Integer pos = posicionImagen(especie);
+
         ListItem listItem = new ListItem(
                 fechaHora,
-                especie,
-                R.drawable.red_drawable
-        );
-        return listItem;
-    }
-
-
-    //BORRAR
-    @Override
-    public ListItem createNewListItem() {
-
-        //these will be 0, 1, 2, or 3
-        int randOne = random.nextInt(4);
-        int randTwo = random.nextInt(4);
-        int randThree = random.nextInt(4);
-
-        //creates a semi-random ListItem
-        ListItem listItem = new ListItem(
-                getHour(),
-                messages[randTwo],
-                drawables[randThree]
+                linea,
+                drawables[pos],
+                image
         );
         return listItem;
     }
@@ -125,12 +121,15 @@ public class FakeDataSource implements DataSourceInterface{
     * SE CREA EL ITEM DE LA ESPECIE
     * ---------------------------------------------------------------*/
     @Override
-    public ListItem agregarEspecie(String scientificName, String imagen){
+    public ListItem agregarEspecie(String especie,String linea, String image){
+
+        Integer pos = posicionImagen(especie);
 
         ListItem listItem = new ListItem(
                 getHour(),
-                scientificName,
-                R.drawable.green_drawable
+                linea,
+                drawables[pos],
+                image
         );
         return listItem;
 
