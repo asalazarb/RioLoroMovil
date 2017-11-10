@@ -31,6 +31,7 @@ public class Controller {
                 selectedItem.getDateAndTime(),
                 selectedItem.getMessage(),
                 selectedItem.getColorResource(),
+                selectedItem.getImage(),
                 viewRoot
         );
     }
@@ -46,16 +47,8 @@ public class Controller {
         );
     }
 
-
-    public void createNewListItem() {
-
-        ListItem newItem = dataSource.createNewListItem();
-
-        view.addNewListItemToView(newItem);
-    }
-
-    public void agregarEspecie(String nombreCientifico, String image){
-        ListItem nuevaEspecie = dataSource.agregarEspecie(nombreCientifico,image);
+    public void agregarEspecie(String especie,String nombreCientifico, String image){
+        ListItem nuevaEspecie = dataSource.agregarEspecie(especie,nombreCientifico,image);
         view.addNewListItemToView(nuevaEspecie);
     }
 
@@ -91,8 +84,8 @@ public class Controller {
         temporaryListItemPosition = 0;
     }
 
-    public ListItem crearEspecie(String especie,String fechaHora){
-        ListItem item = dataSource.recargarItem(especie,fechaHora);
+    public ListItem crearEspecie(String especie,String linea, String fechaHora,String image){
+        ListItem item = dataSource.recargarItem(especie,linea,fechaHora,image);
         return item;
     }
 }

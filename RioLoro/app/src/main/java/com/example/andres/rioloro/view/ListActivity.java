@@ -9,6 +9,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -53,6 +54,8 @@ import com.example.andres.rioloro.persistence.DatabaseHelper;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
@@ -66,6 +69,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
     private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
     private static final String EXTRA_DRAWABLE = "EXTRA_DRAWABLE";
+    private static final String EXTRA_IMAGE = "EXTRA_IMAGE";
 
     private static final String TAG = "ListActivity";
 
@@ -92,6 +96,9 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+        ImageLoader.getInstance().init(config);
+
         recyclerView = (RecyclerView) findViewById(R.id.rec_list_activity);
         layoutInflater = getLayoutInflater();
 
@@ -110,7 +117,6 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         populateRecylerView();
     }
 
-
     //Parte en la que se activa cuando se trata de leer el códigoQR
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -121,6 +127,8 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
                 Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "scanned");
+
+
 
                 //Se ejecuta el agregado de datos con el url leido
                 new ListActivity.JSONTask().execute(result.getContents());
@@ -137,8 +145,8 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     //Funciones para la persistencia de datos
 
     //Función encargada de ingresar la especie a la base de datos
-    public void addData(String especie,String fechaHora){
-        databaseHelper.addData(especie,fechaHora);
+    public void addData(String especie, String linea,String fechaHora,String imageUrl){
+        databaseHelper.addData(especie,linea,fechaHora,imageUrl);
     }
 
     /*Cada vez que el dispositivo cambia de orientacion esta funcion se encarga de
@@ -151,9 +159,11 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
 
         while (data.moveToNext()){
             //Integer valorDelItem = Integer.parseInt(data.getString(1));
-            String valorDelItem = data.getString(1);
-            String valorDeLaFechaHora = data.getString(2);
-            ListItem item = controller.crearEspecie(valorDelItem,valorDeLaFechaHora);
+            String valorDeEspecie = data.getString(1);
+            String valorDelItem = data.getString(2);
+            String valorDeLaFechaHora = data.getString(3);
+            String valorURL = data.getString(4);
+            ListItem item = controller.crearEspecie(valorDeEspecie,valorDelItem,valorDeLaFechaHora, valorURL);
             arrayList.add(item);
         }
         setUpAdapterAndView(arrayList);
@@ -172,11 +182,12 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
      * @param colorResource
      */
     @Override
-    public void startDetailActivity(String dateAndTime, String message, int colorResource, View viewRoot) {
+    public void startDetailActivity(String dateAndTime, String message, int colorResource, String image, View viewRoot) {
         Intent i = new Intent(this, DetailActivity.class);
         i.putExtra(EXTRA_DATE_AND_TIME, dateAndTime);
         i.putExtra(EXTRA_MESSAGE, message);
         i.putExtra(EXTRA_DRAWABLE, colorResource);
+        i.putExtra(EXTRA_IMAGE, image);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             getWindow().setEnterTransition(new Fade(Fade.IN));
@@ -316,6 +327,9 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
             holder.coloredCircle.setImageResource(
                     currentItem.getColorResource()
             );
+            ImageLoader imageLoader= ImageLoader.getInstance();
+            //imageLoader.displayImage("http://img2.wikia.nocookie.net/__cb20101211024122/assassinscreed/images/e/ee/AssassinLogo.png", holder.coloredCircle);
+            imageLoader.displayImage(currentItem.getImage(), holder.coloredCircle);
 
             holder.message.setText(
                     currentItem.getMessage()
@@ -443,19 +457,42 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
             return null;
         }
 
+        //Función que determina si el código ya ha sido leido
+        public boolean enLista(String especie){
+            Cursor data = databaseHelper.getData();
+            ArrayList<ListItem> arrayList = new ArrayList<>();
+
+            while (data.moveToNext()){
+                String valorDeEspecie = data.getString(1);
+                if (valorDeEspecie.equals(especie)){
+                    return true;
+                }
+            }
+            return false;
+        }
+
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             try {
                 JSONObject obj = new JSONObject(result);
-                String newItem = obj.getString("nombreComun")+"\nNombre científico: "+
-                                 obj.getString("nombreCientifico");
-                //JSONObject image = new JSONObject(obj.getString("image"));
-                controller.agregarEspecie(newItem,serverUrl);
+                String especie = obj.getString("nombreCientifico");
 
-                //Ingresa la especie a la base SQLite
-                String fechaHora = getHour();
-                addData(newItem,fechaHora);
+                //URL
+                JSONObject image = new JSONObject(obj.getString("imagen"));
+
+
+                if (!enLista(especie)){
+                    String linea = obj.getString("nombreComun")+"\nNombre científico: "+
+                            obj.getString("nombreCientifico");
+                    controller.agregarEspecie(especie,linea,serverUrl + image.getString("url"));
+
+                    //Ingresa la especie a la base SQLite
+                    String fechaHora = getHour();
+                    addData(especie,linea,fechaHora, serverUrl + image.getString("url"));
+                }else{
+                    Toast.makeText(ListActivity.this, "Cancelled: Especie ya registrada", Toast.LENGTH_LONG).show();
+                }
 
             } catch (JSONException e) {
                 e.printStackTrace();

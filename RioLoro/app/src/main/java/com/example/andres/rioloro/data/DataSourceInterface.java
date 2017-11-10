@@ -15,11 +15,9 @@ public interface DataSourceInterface {
 
     List<ListItem> getListOfData();
 
-    ListItem createNewListItem();
+    ListItem recargarItem(String especie,String linea,String fechaHora, String image);
 
-    ListItem recargarItem(String especie,String fechaHora);
-
-    ListItem agregarEspecie(String x, String y);
+    ListItem agregarEspecie(String especie, String nombreCientifico, String imageUrl);
 
     void deleteListItem(ListItem listItem);
 

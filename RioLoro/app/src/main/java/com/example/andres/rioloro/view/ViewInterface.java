@@ -11,7 +11,7 @@ import java.util.List;
 import com.example.andres.rioloro.data.ListItem;
 
 public interface ViewInterface {
-    void startDetailActivity(String dateAndTime, String message, int colorResource, View viewRoot);
+    void startDetailActivity(String dateAndTime, String message, int colorResource, String image, View viewRoot);
 
     void setUpAdapterAndView(List<ListItem> listOfData);
 
