@@ -5,11 +5,9 @@ package com.example.andres.rioloro.view;
  */
 
 import android.app.ActivityOptions;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -45,8 +43,7 @@ import java.util.Date;
 import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import com.example.andres.rioloro.Main;
-import com.example.andres.rioloro.data.FakeDataSource;
+import com.example.andres.rioloro.data.DataSource;
 import com.example.andres.rioloro.data.ListItem;
 import com.example.andres.rioloro.logic.Controller;
 import com.example.andres.rioloro.R;
@@ -56,7 +53,6 @@ import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -64,7 +60,8 @@ import org.json.JSONObject;
 public class ListActivity extends AppCompatActivity implements ViewInterface, View.OnClickListener{
 
     //URL para el servidor
-    final String serverUrl = "http://172.20.10.3:5050";
+    //final String serverUrl = "http://172.20.10.3:5050";
+    final String serverUrl = "http://192.168.100.33:8081";
 
     private static final String EXTRA_DATE_AND_TIME = "EXTRA_DATE_AND_TIME";
     private static final String EXTRA_MESSAGE = "EXTRA_MESSAGE";
@@ -111,7 +108,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
 
         button.setOnClickListener(this);
 
-        controller = new Controller(this, new FakeDataSource());
+        controller = new Controller(this, new DataSource());
 
         databaseHelper = new DatabaseHelper(this);
         populateRecylerView();
@@ -124,19 +121,15 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
         if (result != null) {
             if (result.getContents() == null) {
                 Log.d("MainActivity", "Cancelled scan");
-                Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Escaneo cancelado", Toast.LENGTH_LONG).show();
             } else {
                 Log.d("MainActivity", "scanned");
 
-
-
                 //Se ejecuta el agregado de datos con el url leido
                 new ListActivity.JSONTask().execute(result.getContents());
-                //controller.createNewListItem();
-                //controller.agregarEspecie("Morpho didius");
             }
         } else {
-            Toast.makeText(this, "Cancelled: ", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Escaneo cancelado", Toast.LENGTH_LONG).show();
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -302,11 +295,6 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
     @Override
     public void onClick(View v) {
         qrScan.initiateScan();
-        /*int viewId = v.getId();
-        if (viewId == R.id.fab_create_new_item) {
-            //User wishes to creat a new RecyclerView Item
-            controller.createNewListItem();
-        }*/
     }
 
     private class CustomAdapter extends RecyclerView.Adapter<CustomAdapter.CustomViewHolder> {//6
@@ -491,7 +479,7 @@ public class ListActivity extends AppCompatActivity implements ViewInterface, Vi
                     String fechaHora = getHour();
                     addData(especie,linea,fechaHora, serverUrl + image.getString("url"));
                 }else{
-                    Toast.makeText(ListActivity.this, "Cancelled: Especie ya registrada", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ListActivity.this, "Cancelado: Especie "+especie+" ya registrada", Toast.LENGTH_LONG).show();
                 }
 
             } catch (JSONException e) {

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">RioLoro</string>
     <string name="title_home">Home</string>
-    <string name="title_dashboard">QR</string>
+    <string name="title_dashboard">Puntuación</string>
     <string name="title_notifications">Album</string>
 
     <string name="text_intro">Bienvenido a la aplicación móvil.</string>
@@ -11,6 +11,6 @@
     <string name="title_activity_index_especies">IndexEspecies</string>
 
     <string name="action_delete_item">Item Deleted</string>
-    <string name="action_undo">UNDO?</string>
+    <string name="action_undo">¿Deshacer?</string>
     <string name="title_toolbar">List Activity</string>
 </resources>
