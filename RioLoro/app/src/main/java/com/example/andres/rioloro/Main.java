@@ -11,10 +11,12 @@ import android.text.Layout;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.example.andres.rioloro.persistence.DatabaseHelper;
 import com.example.andres.rioloro.view.ListActivity;
 
 import java.io.BufferedReader;
@@ -24,11 +26,28 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Random;
 
 public class Main extends AppCompatActivity {
 
     private TextView mTextMessage;
-    private Button mButton;
+    private TextView mColaboradores;
+    private ImageView mImageView;
+    private ImageView mLogoMuni;
+    private ImageView mLogoTEC;
+
+    DatabaseHelper databaseHelper;
+
+    private Random random= new Random();
+
+    private final int[] drawables = {
+            R.drawable.bebedor,
+            R.drawable.contador,
+            R.drawable.lluvia,
+            R.drawable.pensativo,
+            R.drawable.reparador,
+            R.drawable.sembrar
+    };
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -38,12 +57,25 @@ public class Main extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     mTextMessage.setText(R.string.text_intro);
+                    mColaboradores.setText("Con la colaboración de:");
+                    mLogoMuni.setImageResource(R.drawable.logomuni);
+                    mLogoTEC.setImageResource(R.drawable.teclogo);
+
+                    mImageView.setImageResource(0);
                     return true;
                 case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    int cantidad = databaseHelper.getAmount();
+                    mTextMessage.setText("Tu puntuación actual es de "+String.valueOf(cantidad)+" puntos.");
+                    mColaboradores.setText("");
+                    mLogoMuni.setImageResource(0);
+                    mLogoTEC.setImageResource(0);
+
+
+                    int image = random.nextInt(drawables.length);
+                    mImageView.setImageResource(drawables[image]);
+
                     return true;
                 case R.id.navigation_notifications:
-                    // mTextMessage.setText(R.string.title_notifications);
                     startActivity(new Intent(Main.this.getApplicationContext(),ListActivity.class));
                     return true;
             }
@@ -58,17 +90,15 @@ public class Main extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mTextMessage = (TextView) findViewById(R.id.message);
+        mImageView = (ImageView) findViewById(R.id.imgPuntuacion);
+        mColaboradores = (TextView) findViewById(R.id.colaboradores);
+        mLogoMuni = (ImageView) findViewById(R.id.logoMuni);
+        mLogoTEC = (ImageView) findViewById(R.id.logoTEC);
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        mButton = (Button) findViewById(R.id.btnPrueba);
-        mButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                //new JSONTask().execute("http://172.20.10.3:5050/especies/29.json");
-                new JSONTask().execute("http://192.168.100.33:8081/JSON/especie.json");
-            }
-        });
+        databaseHelper = new DatabaseHelper(this);
 
     }
 

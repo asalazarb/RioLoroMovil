@@ -66,4 +66,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor data = db.rawQuery(query,null);
         return  data;
     }
+
+    //Retorna el puntaje del usuario
+    public int getAmount(){
+        int cantidad = 0;
+
+        Cursor data = getData();
+        while (data.moveToNext()){
+            cantidad++;
+        }
+
+        return cantidad*100;
+    }
 }
